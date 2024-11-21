@@ -1,16 +1,16 @@
 import express from "express";
 import {
-    createListing, getAllListings
+    createListing, editListing, getAllListings, getListingById
 } from "../controllers/ListingController";
 import extractJWT from "../middlewares/extractJWT";
 
 const router = express.Router();
 
-router.post("/create-listing",extractJWT, createListing); // create listing
+router.post("/listing",extractJWT, createListing); // create listing
 
-router.get("/listings", getAllListings); // GET /api/users
-// router.get("/:id", getUserById); // GET /api/users/:id
-// router.put("/:id", updateUser); // PUT /api/users/:id
-// router.delete("/:id", deleteUser); // DELETE /api/users/:id
+router.put("/listing/:id",extractJWT, editListing); // update listing
+
+router.get("/listings", getAllListings); // GET ALL Listings
+router.get("/listing/:id", getListingById); // get listing by id
 
 export default router;

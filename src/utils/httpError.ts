@@ -6,7 +6,10 @@ export class HttpError extends Error {
     public static FORBIDDEN_CODE = 403;
     public static FORBIDDEN_DESCRIPTION = "Forbidden"
     public static BAD_REQUEST_CODE = 400;
-    public static BAD_REQUEST_DESCRIPTION = "Bad Requests"
+    public static BAD_REQUEST_DESCRIPTION = "Bad Requests";
+
+    public static CREATE_SUCCESSFUL_CODE = 201;
+    public static SUCESSFUL_CODE = 200;
 
     public statusCode: number;
     public description:string;
