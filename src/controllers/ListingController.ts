@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 import Listing from "../models/Listing";
 import { HttpError } from "../utils/httpError";
-import { PaginationResponse } from "../utils/paginationResponse";
+import { PaginationResponse } from "../utils/PaginationResponse";
 
 export const createListing = async (req: Request, res: Response, next: NextFunction) => {
     let requestBody:Listing = req.body;
