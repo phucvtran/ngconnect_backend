@@ -5,13 +5,15 @@ import {
 //   updateUser,
 //   deleteUser,
     login,
-    createUser
-} from "../controllers/userController";
+    createUser,
+    refreshAccessToken
+} from "../controllers/UserController";
 
 const router = express.Router();
 
 router.post("/register", createUser);
 router.post("/login", login);
+router.post("/refresh-token",refreshAccessToken)
 
 // router.get("/", getAllUsers); // GET /api/users
 // router.get("/:id", getUserById); // GET /api/users/:id
