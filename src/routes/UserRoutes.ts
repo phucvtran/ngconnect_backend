@@ -6,14 +6,16 @@ import {
 //   deleteUser,
     login,
     createUser,
-    refreshAccessToken
+    refreshAccessToken,
+    logout
 } from "../controllers/UserController";
 
 const router = express.Router();
 
 router.post("/register", createUser);
 router.post("/login", login);
-router.post("/refresh-token",refreshAccessToken)
+router.post("/refresh-token",refreshAccessToken);
+router.post("/logout", logout)
 
 // router.get("/", getAllUsers); // GET /api/users
 // router.get("/:id", getUserById); // GET /api/users/:id

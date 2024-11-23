@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { ValidationError } from "sequelize";
 import { HttpError } from "../utils/httpError";
 
-
 export const ErrorHandler = (
   err: any,
   req: Request,
@@ -11,8 +10,14 @@ export const ErrorHandler = (
 ) => {
   // console.error(err); // Log error for debugging
 
-  if(err instanceof HttpError){
-    return res.status(err.statusCode).json({ error_code: err.statusCode, description: err.description, message: err.message });
+  if (err instanceof HttpError) {
+    return res
+      .status(err.statusCode)
+      .json({
+        error_code: err.statusCode,
+        description: err.description,
+        message: err.message,
+      });
   }
 
   // Handle Sequelize validation errors
@@ -37,17 +42,19 @@ export const ErrorHandler = (
     });
   }
 
-    // Handle other specific errors (like unique constraint errors)
-    if (err.name === "SequelizeDatabaseError") {
-      return res.status(400).json({
-        message: "Database SQL Error",
-        errors: err.parent,
-      });
-    }
+  // Handle other specific errors (like unique constraint errors)
+  if (err.name === "SequelizeDatabaseError") {
+    return res.status(400).json({
+      message: "Database SQL Error",
+      errors: err.parent,
+    });
+  }
 
-//   Handle general errors
+  //   Handle general errors
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
-  res.status(statusCode).json({ message, ...(err.errors && { errors: err.errors }) });
+  res
+    .status(statusCode)
+    .json({ message, ...(err.errors && { errors: err.errors }) });
 };
