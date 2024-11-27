@@ -157,7 +157,6 @@ export default class User extends Model<
     allowNull: false,
     validate: {
       notEmpty: true,
-      len: [8, 16],
     },
   })
   declare password: string;
