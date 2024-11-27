@@ -13,10 +13,10 @@ import {
 import User from "./User";
 
 interface ListingAttributes {
-  id: string;
+  id: number;
   title: string;
   description: string;
-  category: string;
+  categoryId: number;
   price: number;
   city: string;
   state: string;
@@ -45,7 +45,7 @@ export default class Listing extends Model<
     type: DataType.INTEGER,
     autoIncrement: true,
   })
-  declare id: string;
+  declare id: number;
 
   @Column({
     type: DataType.STRING,
@@ -84,9 +84,11 @@ export default class Listing extends Model<
   declare zipcode: string;
 
   @Column({
-    type: DataType.ENUM("CAT1", "CAT2", "CAT3"),
+    type: DataType.INTEGER,
+    defaultValue: 0,
+    field: "category_id",
   })
-  declare category: string;
+  declare categoryId: number;
 
   @ForeignKey(() => User)
   @Column({

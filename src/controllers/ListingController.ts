@@ -3,6 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import Listing from "../models/Listing";
 import { HttpError } from "../utils/httpError";
 import { PaginationResponse } from "../utils/PaginationResponse";
+import Job from "../models/Job";
+import sequelize from "../config/dbConnection";
 
 export const createListing = async (
   req: Request,
@@ -24,6 +26,48 @@ export const createListing = async (
       res
         .status(HttpError.CREATE_SUCCESSFUL_CODE)
         .json({ message: "create listing successfully", listing: requestBody });
+    } catch (error) {
+      next(error);
+    }
+  }
+};
+
+export const createJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let requestBody = req.body;
+  if (!res.locals || !res.locals.user.id) {
+    throw new HttpError(
+      HttpError.UNAUTHORIZED_CODE,
+      HttpError.UNAUTHORIZED_DESCRIPTION,
+      "Restricted permission or session is expired."
+    );
+  } else if (res.locals.user.id) {
+    requestBody.createdUser = res.locals.user.id;
+    try {
+      //check if user want to create job;
+      if (requestBody.categoryId !== 1) {
+        throw new HttpError(
+          HttpError.BAD_REQUEST_CODE,
+          HttpError.BAD_REQUEST_DESCRIPTION,
+          "You are trying to create listing. use createListing api instead."
+        );
+      } else {
+        const result = await sequelize.transaction(async (t) => {
+          const createdListing: Listing = await Listing.create(requestBody, {
+            transaction: t,
+          });
+          requestBody.listingId = createdListing.id;
+          await Job.create(requestBody, { transaction: t });
+          return requestBody;
+        });
+
+        res
+          .status(HttpError.CREATE_SUCCESSFUL_CODE)
+          .json({ message: "create job successfully", listing: result });
+      }
     } catch (error) {
       next(error);
     }
