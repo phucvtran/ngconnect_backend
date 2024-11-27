@@ -11,6 +11,9 @@ import {
   IsEmail,
   Unique,
   HasMany,
+  NotEmpty,
+  AllowNull,
+  Length,
 } from "sequelize-typescript";
 import Listing from "./Listing";
 
@@ -43,6 +46,9 @@ export default class User extends Model<
     primaryKey: true,
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
+    validate: {
+      isUUID: 4,
+    },
   })
   declare id: string;
 
@@ -50,6 +56,13 @@ export default class User extends Model<
     type: DataType.STRING,
     field: "first_name",
     allowNull: false,
+    validate: {
+      notEmpty: {
+        msg: "first name must not be empty",
+      },
+      isAlpha: true,
+      len: [3, 20],
+    },
   })
   declare firstName: string;
 
@@ -57,52 +70,95 @@ export default class User extends Model<
     type: DataType.STRING,
     field: "last_name",
     allowNull: false,
+    validate: {
+      notEmpty: {
+        msg: "last name must not be empty",
+      },
+      isAlpha: true,
+      len: [3, 20],
+    },
   })
   declare lastName: string;
 
   @Column({
     type: DataType.STRING,
     unique: true,
+    validate: {
+      isEmail: true,
+      notEmpty: {
+        msg: "must has email",
+      },
+    },
   })
   declare email: string;
 
   @Column({
     type: DataType.ENUM("ADMIN", "BUSINESS", "USER"),
     defaultValue: "USER",
+    validate: {
+      isIn: [["ADMIN", "BUSINESS", "USER"]],
+    },
   })
   declare role: string;
 
   @Column({
     type: DataType.STRING,
+    validate: {
+      notEmpty: true,
+      len: [5, 50],
+    },
   })
   declare address: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      isAlpha: true,
+      len: [2, 50],
+    },
   })
   declare city: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      isAlpha: true,
+      len: [2, 20],
+    },
   })
   declare state: string;
 
   @Column({
     type: DataType.STRING,
+    validate: {
+      notEmpty: true,
+      isNumeric: true,
+      len: [5, 10],
+    },
   })
   declare zipcode: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [5, 15],
+    },
   })
   declare phone: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [8, 16],
+    },
   })
   declare password: string;
 

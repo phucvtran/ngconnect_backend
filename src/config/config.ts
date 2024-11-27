@@ -1,5 +1,3 @@
-import path from "path";
-
 const config = {
   getDataBaseConfig: () => ({
     database: process.env.DB_NAME,
@@ -8,5 +6,10 @@ const config = {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT || "3306"),
   }),
+  corsOptions: {
+    origin: "http://localhost:3000", // Replace with your frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Accept", "Authorization"], // Allowed headers
+  },
 };
 export default config;

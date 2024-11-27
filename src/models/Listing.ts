@@ -9,8 +9,10 @@ import {
   UpdatedAt,
   ForeignKey,
   BelongsTo,
+  HasOne,
 } from "sequelize-typescript";
 import User from "./User";
+import Job from "./Job";
 
 interface ListingAttributes {
   id: number;
@@ -42,44 +44,73 @@ export default class Listing extends Model<
 > {
   @Column({
     primaryKey: true,
-    type: DataType.INTEGER,
+    type: DataType.INTEGER.UNSIGNED,
     autoIncrement: true,
+    validate: {
+      isInt: true,
+    },
   })
   declare id: number;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [2, 100],
+    },
   })
   declare title: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+    },
   })
   declare description: string;
 
   @Column({
     type: DataType.FLOAT,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      isNumeric: true,
+    },
   })
   declare price: number;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [2, 20],
+      isAlpha: true,
+    },
   })
   declare city: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [2, 15],
+      isAlpha: true,
+    },
   })
   declare state: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      isNumeric: true,
+      len: [5, 10],
+    },
   })
   declare zipcode: string;
 
@@ -87,6 +118,10 @@ export default class Listing extends Model<
     type: DataType.INTEGER,
     defaultValue: 0,
     field: "category_id",
+    validate: {
+      notEmpty: true,
+      isInt: true,
+    },
   })
   declare categoryId: number;
 
@@ -95,6 +130,9 @@ export default class Listing extends Model<
     type: DataType.UUID,
     allowNull: false,
     field: "created_user",
+    validate: {
+      isUUID: 4,
+    },
   })
   declare createdUser: string;
 
@@ -118,6 +156,9 @@ export default class Listing extends Model<
     type: DataType.ENUM("ACTIVE", "IN_PROGRESS", "COMPLETED"),
     allowNull: false,
     defaultValue: "ACTIVE",
+    validate: {
+      isIn: [["ACTIVE", "IN_PROGRESS", "COMPLETED"]],
+    },
   })
   declare status: string;
 
@@ -134,4 +175,7 @@ export default class Listing extends Model<
     field: "updated_date",
   })
   declare updatedDate: Date;
+
+  @HasOne(() => Job)
+  declare job: Job;
 }

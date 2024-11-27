@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { HttpError } from "./httpError";
 interface paginatedResponse {
   total?: number;
   page: number;
@@ -38,7 +39,7 @@ export class PaginationResponse {
   private setTotalPages() {
     this.paginationResponse.totalPages = Math.ceil(
       this.paginationResponse.total
-        ? this.paginationResponse.total
+        ? this.paginationResponse.total / this.paginationResponse.limit
         : 0 / this.paginationResponse.limit
     );
   }
@@ -49,6 +50,13 @@ export class PaginationResponse {
   }
 
   public getOffset(): number {
+    if (this.paginationResponse.page === 0) {
+      throw new HttpError(
+        HttpError.BAD_REQUEST_CODE,
+        HttpError.BAD_REQUEST_DESCRIPTION,
+        "page can't be 0"
+      );
+    }
     return (this.paginationResponse.page - 1) * this.paginationResponse.limit;
   }
 

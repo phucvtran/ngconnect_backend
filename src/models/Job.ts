@@ -30,8 +30,11 @@ interface JobCreationAttributes
 export default class Job extends Model<JobAttributes, JobCreationAttributes> {
   @Column({
     primaryKey: true,
-    type: DataType.INTEGER,
+    type: DataType.INTEGER.UNSIGNED,
     autoIncrement: true,
+    validate: {
+      isInt: true,
+    },
   })
   declare id: number;
 
@@ -40,6 +43,9 @@ export default class Job extends Model<JobAttributes, JobCreationAttributes> {
     type: DataType.INTEGER,
     allowNull: false,
     field: "listing_id",
+    validate: {
+      isInt: true,
+    },
   })
   declare listingId: number;
 
@@ -50,12 +56,19 @@ export default class Job extends Model<JobAttributes, JobCreationAttributes> {
     type: DataType.FLOAT,
     allowNull: false,
     field: "min_rate",
+    validate: {
+      isNumeric: true,
+      notEmpty: true,
+    },
   })
   declare minRate: number;
 
   @Column({
     type: DataType.FLOAT,
     field: "max_rate",
+    validate: {
+      isNumeric: true,
+    },
   })
   declare maxRate: number;
 
@@ -63,12 +76,19 @@ export default class Job extends Model<JobAttributes, JobCreationAttributes> {
     type: DataType.DATE,
     allowNull: false,
     field: "start_date",
+    validate: {
+      isDate: true,
+      isAfter: new Date().toISOString(),
+    },
   })
   declare startDate: Date;
 
   @Column({
     type: DataType.DATE,
     field: "end_date",
+    validate: {
+      isDate: true,
+    },
   })
   declare endDate: Date;
 }

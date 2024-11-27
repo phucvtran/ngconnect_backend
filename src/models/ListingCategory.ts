@@ -7,7 +7,7 @@ import { Table, Column, Model, DataType } from "sequelize-typescript";
 export class ListingCategory extends Model {
   @Column({
     primaryKey: true,
-    type: DataType.INTEGER,
+    type: DataType.INTEGER.UNSIGNED,
     autoIncrement: true,
   })
   declare id: number;
