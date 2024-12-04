@@ -16,14 +16,14 @@ export class PaginationResponse {
   constructor(req: Request) {
     this.paginationResponse = {
       limit: parseInt((req.query.limit as string) || "10"),
-      page: parseInt((req.query.page as string) || "10"),
+      page: parseInt((req.query.page as string) || "1"),
       dir:
         (req.query.dir as string) === "ASC"
           ? "ASC"
           : (req.query.dir as string) === "DESC"
           ? "DESC"
           : "ASC",
-      sortBy: (req.query.sortBy as string) || "id",
+      sortBy: (req.query.sortBy as string) || "updatedDate",
       results: [],
     };
   }

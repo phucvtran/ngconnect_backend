@@ -7,7 +7,8 @@ const config = {
     port: parseInt(process.env.DB_PORT || "3306"),
   }),
   corsOptions: {
-    origin: "http://localhost:3000", // Replace with your frontend URL
+    // origin: "http://localhost:3000", // Replace with your frontend URL
+    origin: "http://18.224.153.196:3000", // front-end api
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     allowedHeaders: ["Content-Type", "Accept", "Authorization"], // Allowed headers
   },

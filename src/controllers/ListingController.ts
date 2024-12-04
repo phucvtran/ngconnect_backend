@@ -121,7 +121,7 @@ export const getAllListings = async (
       limit: response.getResponse().limit,
       offset: response.getOffset(),
       order: response.getOrder(),
-      include: ["job"],
+      include: ["user", "job"],
       // attributes: { exclude: ["password"] },
     });
 
