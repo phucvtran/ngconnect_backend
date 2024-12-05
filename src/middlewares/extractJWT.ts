@@ -10,6 +10,11 @@ const extractJWT = (req: Request, res: Response, next: NextFunction) => {
   if (token) {
     jwt.verify(token, SECRET_KEY, (error, decoded) => {
       if (error) {
+        if (error?.message === "jwt expired") {
+          return res.status(401).json({
+            message: "Token expired!",
+          });
+        }
         throw new HttpError(
           HttpError.FORBIDDEN_CODE,
           HttpError.FORBIDDEN_DESCRIPTION,

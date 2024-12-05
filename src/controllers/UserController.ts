@@ -65,13 +65,11 @@ export const login = async (
             "Unable to sign JWT"
           );
         } else if (token) {
-          return res
-            .status(200)
-            .json({
-              message: "Login Successful",
-              token: { accessToken: token, refreshToken: refreshToken },
-              user: user,
-            });
+          return res.status(200).json({
+            message: "Login Successful",
+            token: { accessToken: token, refreshToken: refreshToken },
+            user: user,
+          });
         }
       });
     }
