@@ -16,9 +16,9 @@ const extractJWT = (req: Request, res: Response, next: NextFunction) => {
           });
         }
         throw new HttpError(
-          HttpError.FORBIDDEN_CODE,
-          HttpError.FORBIDDEN_DESCRIPTION,
-          "Restricted permission or session expired"
+          HttpError.UNAUTHORIZED_CODE,
+          HttpError.UNAUTHORIZED_DESCRIPTION,
+          "Session expired"
         );
       } else {
         res.locals.user = decoded;
@@ -27,7 +27,7 @@ const extractJWT = (req: Request, res: Response, next: NextFunction) => {
     });
   } else {
     return res.status(401).json({
-      message: "Unauthorized",
+      message: "Access token is missing",
     });
   }
 };
