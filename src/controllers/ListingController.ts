@@ -133,6 +133,36 @@ export const getAllListings = async (
   }
 };
 
+export const getListingsByCurrentUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let response = new PaginationResponse(req);
+  if (!res.locals || !res.locals.user.id) {
+    throw new HttpError(
+      HttpError.UNAUTHORIZED_CODE,
+      HttpError.UNAUTHORIZED_DESCRIPTION,
+      "Restricted permission or session is expired."
+    );
+  } else if (res.locals.user.id) {
+    try {
+      const { rows: listings, count: total } = await Listing.findAndCountAll({
+        where: { createdUser: res.locals.user.id },
+        limit: response.getResponse().limit,
+        offset: response.getOffset(),
+        order: response.getOrder(),
+        include: ["user", "job"],
+      });
+      response.setResults(listings);
+      response.setTotal(total);
+      res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
+    } catch (error) {
+      next(error);
+    }
+  }
+};
+
 export const getListingById = async (
   req: Request,
   res: Response,

@@ -6,6 +6,7 @@ import {
   editListing,
   getAllListings,
   getListingById,
+  getListingsByCurrentUser,
 } from "../controllers/ListingController";
 import extractJWT from "../middlewares/extractJWT";
 
@@ -21,5 +22,7 @@ router.put("/job/:id", extractJWT, editJob); // update job
 
 router.get("/listings", getAllListings); // GET ALL Listings
 router.get("/listing/:id", getListingById); // get listing by id
+
+router.get("/myListings", extractJWT, getListingsByCurrentUser);
 
 export default router;
