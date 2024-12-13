@@ -10,9 +10,11 @@ import {
   ForeignKey,
   BelongsTo,
   HasOne,
+  HasMany,
 } from "sequelize-typescript";
 import User from "./User";
 import Job from "./Job";
+import ListingRequest from "./ListingRequest";
 
 interface ListingAttributes {
   id: number;
@@ -115,7 +117,7 @@ export default class Listing extends Model<
   declare zipcode: string;
 
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.INTEGER.UNSIGNED,
     defaultValue: 0,
     field: "category_id",
     validate: {
@@ -178,4 +180,7 @@ export default class Listing extends Model<
 
   @HasOne(() => Job)
   declare job: Job;
+
+  @HasMany(() => ListingRequest)
+  declare listingRequests: ListingRequest[];
 }

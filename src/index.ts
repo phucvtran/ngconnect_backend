@@ -13,6 +13,7 @@ import config from "./config/config";
   console.log("connect DB and created table");
   await sequelize.sync();
   // await sequelize.sync({ alter: true });
+  // await sequelize.sync({ force: true }); // Warning: This will drop and recreate tables
 })();
 const app: Express = express();
 const port = process.env.PORT || 8080;

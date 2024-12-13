@@ -40,7 +40,7 @@ export default class Job extends Model<JobAttributes, JobCreationAttributes> {
 
   @ForeignKey(() => Listing)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.INTEGER.UNSIGNED,
     allowNull: false,
     field: "listing_id",
     validate: {
