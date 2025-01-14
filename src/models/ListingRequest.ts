@@ -10,6 +10,8 @@ import {
   CreatedAt,
   UpdatedAt,
   HasMany,
+  NotEmpty,
+  NotNull,
 } from "sequelize-typescript";
 import Listing from "./Listing";
 import User from "./User";
@@ -18,7 +20,7 @@ import ReservationDates from "./ReservationDates";
 
 interface ListingRequestAttributes {
   id: number;
-  listingId: string;
+  listingId: number;
   createdUser: User;
 }
 
@@ -26,7 +28,7 @@ interface ListingRequestCreationAttributes
   extends Optional<ListingRequestAttributes, "id"> {}
 
 @Table({
-  timestamps: false,
+  timestamps: true,
   tableName: "listing_requests",
   modelName: "ListingRequest",
 })
@@ -55,7 +57,7 @@ export default class ListingRequest extends Model<
   })
   declare listingId: number;
 
-  @BelongsTo(() => Listing)
+  @BelongsTo(() => Listing, "listingId")
   declare listing: Listing;
 
   @ForeignKey(() => User)
@@ -67,10 +69,10 @@ export default class ListingRequest extends Model<
       isUUID: 4,
     },
   })
-  declare createdUserID: string;
+  declare createdUser: User;
 
   @BelongsTo(() => User)
-  declare receiver: User;
+  declare sender: User;
 
   @CreatedAt
   @Column({
@@ -91,4 +93,7 @@ export default class ListingRequest extends Model<
 
   @HasMany(() => ReservationDates)
   declare reservationDates: ReservationDates[];
+
+  message!: string;
+  reservationDate!: Date[];
 }

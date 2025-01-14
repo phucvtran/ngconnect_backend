@@ -23,7 +23,7 @@ interface ConversationsAttributes {
 }
 
 interface ConversationsCreationAttributes
-  extends Optional<ConversationsAttributes, "id"> {}
+  extends Optional<ConversationsAttributes, "id" | "sender" | "receiver"> {}
 
 @Table({
   timestamps: true,

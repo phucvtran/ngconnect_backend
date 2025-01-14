@@ -8,6 +8,7 @@ import { ErrorHandler } from "./middlewares/ErrorHandler";
 import UserRoutes from "./routes/UserRoutes";
 import ListingRoutes from "./routes/ListingRoutes";
 import config from "./config/config";
+import RequestRoutes from "./routes/RequestRoutes";
 
 (async () => {
   console.log("connect DB and created table");
@@ -25,7 +26,9 @@ app.use(express.json());
 //apply routes
 app.use("/api/users", UserRoutes);
 
-app.use("/api/", ListingRoutes);
+app.use("/api/request", RequestRoutes);
+
+app.use("/api/listing", ListingRoutes);
 
 // Error Handling Middleware (Always at the end)
 app.use(ErrorHandler);
