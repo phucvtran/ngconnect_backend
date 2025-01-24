@@ -13,17 +13,17 @@ export const createListing = async (
   res: Response,
   next: NextFunction
 ) => {
-  let requestBody: Listing = req.body;
-  if (!res.locals || !res.locals.user.id) {
-    throw new HttpError(
-      HttpError.UNAUTHORIZED_CODE,
-      HttpError.UNAUTHORIZED_DESCRIPTION,
-      "Restricted permission or session is expired."
-    );
-  } else if (res.locals.user.id) {
-    requestBody.createdUser = res.locals.user.id;
+  try {
+    let requestBody: Listing = req.body;
+    if (!res.locals || !res.locals.user.id) {
+      throw new HttpError(
+        HttpError.UNAUTHORIZED_CODE,
+        HttpError.UNAUTHORIZED_DESCRIPTION,
+        "Restricted permission or session is expired."
+      );
+    } else if (res.locals.user.id) {
+      requestBody.createdUser = res.locals.user.id;
 
-    try {
       if (requestBody.categoryId === 1) {
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
@@ -35,9 +35,9 @@ export const createListing = async (
       res
         .status(HttpError.CREATE_SUCCESSFUL_CODE)
         .json({ message: "create listing successfully", listing: requestBody });
-    } catch (error) {
-      next(error);
     }
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -47,16 +47,16 @@ export const editListing = async (
   next: NextFunction
 ) => {
   let requestBody: Listing = req.body;
-  if (!res.locals || !res.locals.user.id) {
-    throw new HttpError(
-      HttpError.UNAUTHORIZED_CODE,
-      HttpError.UNAUTHORIZED_DESCRIPTION,
-      "Restricted permission or session is expired."
-    );
-  } else if (res.locals.user.id) {
-    requestBody.createdUser = res.locals.user.id;
+  try {
+    if (!res.locals || !res.locals.user.id) {
+      throw new HttpError(
+        HttpError.UNAUTHORIZED_CODE,
+        HttpError.UNAUTHORIZED_DESCRIPTION,
+        "Restricted permission or session is expired."
+      );
+    } else if (res.locals.user.id) {
+      requestBody.createdUser = res.locals.user.id;
 
-    try {
       if (requestBody?.categoryId === 1) {
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
@@ -77,9 +77,9 @@ export const editListing = async (
       res
         .status(HttpError.SUCESSFUL_CODE)
         .json({ message: "update listing successfully", listing: listing });
-    } catch (error) {
-      next(error);
     }
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -121,6 +121,7 @@ export const getAllListings = async (
       limit: response.getResponse().limit,
       offset: response.getOffset(),
       order: response.getOrder(),
+      distinct: true,
       include: ["user", "job"],
       // attributes: { exclude: ["password"] },
     });
@@ -139,27 +140,28 @@ export const getListingsByCurrentUser = async (
   next: NextFunction
 ) => {
   let response = new PaginationResponse(req);
-  if (!res.locals || !res.locals.user.id) {
-    throw new HttpError(
-      HttpError.UNAUTHORIZED_CODE,
-      HttpError.UNAUTHORIZED_DESCRIPTION,
-      "Restricted permission or session is expired."
-    );
-  } else if (res.locals.user.id) {
-    try {
+  try {
+    if (!res.locals || !res.locals.user.id) {
+      throw new HttpError(
+        HttpError.UNAUTHORIZED_CODE,
+        HttpError.UNAUTHORIZED_DESCRIPTION,
+        "Restricted permission or session is expired."
+      );
+    } else if (res.locals.user.id) {
       const { rows: listings, count: total } = await Listing.findAndCountAll({
         where: { createdUser: res.locals.user.id },
         limit: response.getResponse().limit,
         offset: response.getOffset(),
         order: response.getOrder(),
+        distinct: true,
         include: ["user", "job"],
       });
       response.setResults(listings);
       response.setTotal(total);
       res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
-    } catch (error) {
-      next(error);
     }
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -193,15 +195,16 @@ export const createJob = async (
   next: NextFunction
 ) => {
   let requestBody = req.body;
-  if (!res.locals || !res.locals.user.id) {
-    throw new HttpError(
-      HttpError.UNAUTHORIZED_CODE,
-      HttpError.UNAUTHORIZED_DESCRIPTION,
-      "Restricted permission or session is expired."
-    );
-  } else if (res.locals.user.id) {
-    requestBody.createdUser = res.locals.user.id;
-    try {
+  try {
+    if (!res.locals || !res.locals.user.id) {
+      throw new HttpError(
+        HttpError.UNAUTHORIZED_CODE,
+        HttpError.UNAUTHORIZED_DESCRIPTION,
+        "Restricted permission or session is expired."
+      );
+    } else if (res.locals.user.id) {
+      requestBody.createdUser = res.locals.user.id;
+
       //check if user want to create job;
       if (requestBody.categoryId !== 1) {
         throw new HttpError(
@@ -224,9 +227,9 @@ export const createJob = async (
           .status(HttpError.CREATE_SUCCESSFUL_CODE)
           .json({ message: "create job successfully", listing: result });
       }
-    } catch (error) {
-      next(error);
     }
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -236,16 +239,16 @@ export const editJob = async (
   next: NextFunction
 ) => {
   let requestBody = req.body;
-  if (!res.locals || !res.locals.user.id) {
-    throw new HttpError(
-      HttpError.UNAUTHORIZED_CODE,
-      HttpError.UNAUTHORIZED_DESCRIPTION,
-      "Restricted permission or session is expired."
-    );
-  } else if (res.locals.user.id) {
-    requestBody.createdUser = res.locals.user.id;
+  try {
+    if (!res.locals || !res.locals.user.id) {
+      throw new HttpError(
+        HttpError.UNAUTHORIZED_CODE,
+        HttpError.UNAUTHORIZED_DESCRIPTION,
+        "Restricted permission or session is expired."
+      );
+    } else if (res.locals.user.id) {
+      requestBody.createdUser = res.locals.user.id;
 
-    try {
       if (requestBody.categoryId !== 1) {
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
@@ -281,8 +284,8 @@ export const editJob = async (
       res
         .status(HttpError.SUCESSFUL_CODE)
         .json({ message: "update job successfully", listing: result });
-    } catch (error) {
-      next(error);
     }
+  } catch (error) {
+    next(error);
   }
 };

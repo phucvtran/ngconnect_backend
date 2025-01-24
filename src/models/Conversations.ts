@@ -102,4 +102,11 @@ export default class Conversations extends Model<
     field: "created_date",
   })
   declare createdDate: Date;
+
+  @UpdatedAt
+  @Column({
+    type: DataType.DATE,
+    field: "updated_date",
+  })
+  declare updatedDate: Date;
 }

@@ -78,7 +78,11 @@ export const login = async (
   }
 };
 
-export const refreshAccessToken = async (req: Request, res: Response) => {
+export const refreshAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { refreshToken } = req.body;
 
@@ -124,11 +128,7 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       accessToken,
     });
   } catch (error: any) {
-    throw new HttpError(
-      HttpError.FORBIDDEN_CODE,
-      HttpError.FORBIDDEN_DESCRIPTION,
-      "Invalid or expired refresh token."
-    );
+    next(error);
   }
 };
 

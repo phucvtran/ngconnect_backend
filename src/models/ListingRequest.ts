@@ -21,7 +21,7 @@ import ReservationDates from "./ReservationDates";
 interface ListingRequestAttributes {
   id: number;
   listingId: number;
-  createdUser: User;
+  createdUser: string;
 }
 
 interface ListingRequestCreationAttributes
@@ -69,10 +69,10 @@ export default class ListingRequest extends Model<
       isUUID: 4,
     },
   })
-  declare createdUser: User;
+  declare createdUser: string;
 
-  @BelongsTo(() => User)
-  declare sender: User;
+  @BelongsTo(() => User, "createdUser")
+  declare createdUserObj: User;
 
   @CreatedAt
   @Column({

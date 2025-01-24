@@ -22,8 +22,8 @@ export class PaginationResponse {
           ? "ASC"
           : (req.query.dir as string) === "DESC"
           ? "DESC"
-          : "ASC",
-      sortBy: (req.query.sortBy as string) || "updatedDate",
+          : "DESC",
+      sortBy: (req.query.sortBy as string) || "updateDate" || "createdDate",
       results: [],
     };
   }

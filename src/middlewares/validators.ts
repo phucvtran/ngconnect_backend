@@ -45,36 +45,3 @@ export const validateListingRequest = (
 
   next();
 };
-
-const sendMessageSchema = Joi.object({
-  listingRequestId: Joi.number().required(),
-  senderId: Joi.string().uuid().required(),
-  receiverId: Joi.string().uuid().required(),
-  message: Joi.string().min(1).max(500).required().messages({
-    "string.empty": "Message is required",
-    "string.min": "Message must be at least 1 character",
-    "string.max": "Message cannot exceed 500 characters",
-  }),
-});
-
-export const validateSendMessageRequest = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { error } = sendMessageSchema.validate(req.body, {
-    abortEarly: false,
-  });
-
-  if (error) {
-    return res.status(400).json({
-      message: "Validation Error",
-      errors: error.details.map((error) => ({
-        field: error.path,
-        message: error.message,
-      })),
-    });
-  }
-
-  next();
-};
