@@ -11,6 +11,9 @@ http://18.217.230.205:3000/login
 | admin@gmail.com | password |
 | user@gmail.com | password |
 
+### Frontend Repository
+https://github.com/phucvtran/ngconnect
+
 ## 🚀 Features  
 
 ### 🔐 Authentication & Security  
