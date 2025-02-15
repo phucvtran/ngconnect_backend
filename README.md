@@ -3,7 +3,7 @@
 A **marketplace platform** where users can post **items for sale, services, or jobs** and connect via **real-time chat**. Built with **Express.js, TypeScript, MySQL, and Socket.io**, this backend provides a secure and scalable foundation for user authentication, listing management, and messaging.  
 
 ### Demo
-http://18.217.230.205:3000/login
+http://18.217.230.205:3000
 
 ## Test Accounts:
 | Username  | Password |
