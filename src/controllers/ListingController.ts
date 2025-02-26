@@ -91,8 +91,10 @@ export const getAllListings = async (
   try {
     let response = new PaginationResponse(req);
 
-    // Build the where clause for filtering by category
     const whereClause: any = {};
+
+    // Build the where clause for filtering by category
+    // get listing by multi categories
     if (req.query.categoryId) {
       //get latest category list; uncomment this to has category filter error handler
       // let listingCategories = await ListingCategory.findAll();
@@ -114,6 +116,14 @@ export const getAllListings = async (
       whereClause.categoryId = {
         [Op.in]: categoryIdsArray, // Match any in the array
       };
+    }
+
+    // search key will target title or description of the listing.
+    if (req.query.search) {
+      whereClause[Op.or] = [
+        { title: { [Op.like]: `%${req.query.search}%` } }, // Title contains searchQuery
+        { description: { [Op.like]: `%${req.query.search}%` } },
+      ];
     }
 
     const { rows: listings, count: total } = await Listing.findAndCountAll({

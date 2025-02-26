@@ -45,7 +45,7 @@ app.listen(port, () => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Allow React frontend
+    origin: "*", // Allow React frontend
     methods: ["GET", "POST"],
   },
 });
@@ -74,6 +74,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => {
+server.listen(5000, "0.0.0.0", () => {
   console.log("Live Chat Server running on port 5000");
 });
