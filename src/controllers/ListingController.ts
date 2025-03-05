@@ -6,8 +6,10 @@ import { PaginationResponse } from "../utils/PaginationResponse";
 import Job from "../models/Job";
 import sequelize from "../config/dbConnection";
 import { Op } from "sequelize";
-import { ListingCategory } from "../models/ListingCategory";
 
+/**
+ * create listing item
+ */
 export const createListing = async (
   req: Request,
   res: Response,
@@ -19,7 +21,7 @@ export const createListing = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       requestBody.createdUser = res.locals.user.id;
@@ -28,19 +30,26 @@ export const createListing = async (
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
           HttpError.BAD_REQUEST_DESCRIPTION,
-          "You are trying to create job. use createJob api instead."
+          HttpError.HTTP_MESSAGE.ERROR_CREATE_JOB
         );
       }
       await Listing.create(requestBody);
-      res
-        .status(HttpError.CREATE_SUCCESSFUL_CODE)
-        .json({ message: "create listing successfully", listing: requestBody });
+      res.status(HttpError.CREATE_SUCCESSFUL_CODE).json({
+        message: HttpError.HTTP_MESSAGE.SUCCESS_CREATE_LISTING,
+        listing: requestBody,
+      });
     }
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Update listing item.
+ * @param req
+ * @param res
+ * @param next
+ */
 export const editListing = async (
   req: Request,
   res: Response,
@@ -52,16 +61,17 @@ export const editListing = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       requestBody.createdUser = res.locals.user.id;
 
+      // throw error, if user try to update normal listing to job listing
       if (requestBody?.categoryId === 1) {
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
           HttpError.BAD_REQUEST_DESCRIPTION,
-          "Can't change this listing to Job Listing"
+          HttpError.HTTP_MESSAGE.ERROR_MODIFY_LISTING_CATEGORY_TO_JOB
         );
       }
       const listing = await Listing.findOne({ where: { id: req.params.id } });
@@ -69,20 +79,27 @@ export const editListing = async (
         throw new HttpError(
           HttpError.NOT_FOUND_CODE,
           HttpError.NOT_FOUND_DESCRIPTION,
-          "Listing does not exist."
+          HttpError.HTTP_MESSAGE.ERROR_LISTING_DOESNOT_EXISTED
         );
       } else {
         listing.update(requestBody);
       }
-      res
-        .status(HttpError.SUCESSFUL_CODE)
-        .json({ message: "update listing successfully", listing: listing });
+      res.status(HttpError.SUCCESSFUL_CODE).json({
+        message: HttpError.HTTP_MESSAGE.SUCCESS_UPDATE_LISTING,
+        listing: listing,
+      });
     }
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * get all listing
+ * @param req request include the searchQuery, it will target %like% to title and description
+ * @param res a list of listings.
+ * @param next
+ */
 export const getAllListings = async (
   req: Request,
   res: Response,
@@ -126,24 +143,32 @@ export const getAllListings = async (
       ];
     }
 
+    // apply pagination, sort and search
     const { rows: listings, count: total } = await Listing.findAndCountAll({
       where: whereClause,
       limit: response.getResponse().limit,
       offset: response.getOffset(),
       order: response.getOrder(),
       distinct: true,
-      include: ["user", "job"],
+      include: ["user", "job"], // include user and job object in the response.
       // attributes: { exclude: ["password"] },
     });
 
     response.setResults(listings);
     response.setTotal(total);
-    res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
+    res.status(HttpError.SUCCESSFUL_CODE).json(response.getResponse());
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * get listing by current user. For my post Screen.
+ * Note: add searchQuery in needed.
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getListingsByCurrentUser = async (
   req: Request,
   res: Response,
@@ -155,7 +180,7 @@ export const getListingsByCurrentUser = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       const { rows: listings, count: total } = await Listing.findAndCountAll({
@@ -168,13 +193,19 @@ export const getListingsByCurrentUser = async (
       });
       response.setResults(listings);
       response.setTotal(total);
-      res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
+      res.status(HttpError.SUCCESSFUL_CODE).json(response.getResponse());
     }
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get listing by listing ID.
+ * @param req
+ * @param res a listing object
+ * @param next
+ */
 export const getListingById = async (
   req: Request,
   res: Response,
@@ -189,16 +220,22 @@ export const getListingById = async (
       throw new HttpError(
         HttpError.NOT_FOUND_CODE,
         HttpError.NOT_FOUND_DESCRIPTION,
-        "Listing does not exist."
+        HttpError.HTTP_MESSAGE.ERROR_LISTING_DOESNOT_EXISTED
       );
     } else {
-      res.status(HttpError.SUCESSFUL_CODE).json(listing);
+      res.status(HttpError.SUCCESSFUL_CODE).json(listing);
     }
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Create job listing, category == 1
+ * @param req
+ * @param res
+ * @param next
+ */
 export const createJob = async (
   req: Request,
   res: Response,
@@ -210,7 +247,7 @@ export const createJob = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       requestBody.createdUser = res.locals.user.id;
@@ -220,7 +257,7 @@ export const createJob = async (
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
           HttpError.BAD_REQUEST_DESCRIPTION,
-          "You are trying to create listing. use createListing api instead."
+          HttpError.HTTP_MESSAGE.ERROR_CREATE_LISTING
         );
       } else {
         const result = await sequelize.transaction(async (t) => {
@@ -233,9 +270,10 @@ export const createJob = async (
           return createdListing;
         });
 
-        res
-          .status(HttpError.CREATE_SUCCESSFUL_CODE)
-          .json({ message: "create job successfully", listing: result });
+        res.status(HttpError.CREATE_SUCCESSFUL_CODE).json({
+          message: HttpError.HTTP_MESSAGE.SUCCESS_CREATE_JOB,
+          listing: result,
+        });
       }
     }
   } catch (error) {
@@ -243,6 +281,12 @@ export const createJob = async (
   }
 };
 
+/**
+ * edit job listing
+ * @param req
+ * @param res
+ * @param next
+ */
 export const editJob = async (
   req: Request,
   res: Response,
@@ -254,16 +298,17 @@ export const editJob = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       requestBody.createdUser = res.locals.user.id;
 
+      // if user try to change the job listing category, throw error.
       if (requestBody.categoryId !== 1) {
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
           HttpError.BAD_REQUEST_DESCRIPTION,
-          "Can't Change Job Listing to Normal Listing"
+          HttpError.HTTP_MESSAGE.ERROR_MODIFY_JOB_LISTING_CATEGORY_TO_NORMAL
         );
       }
       const result = await sequelize.transaction(async (t) => {
@@ -275,7 +320,7 @@ export const editJob = async (
           throw new HttpError(
             HttpError.NOT_FOUND_CODE,
             HttpError.NOT_FOUND_DESCRIPTION,
-            "Job does not exist."
+            HttpError.HTTP_MESSAGE.ERROR_JOB_LISTING_DOESNOT_EXISTED
           );
         } else {
           await job.update(requestBody, { transaction: t });
@@ -291,9 +336,10 @@ export const editJob = async (
         return requestBody;
       });
 
-      res
-        .status(HttpError.SUCESSFUL_CODE)
-        .json({ message: "update job successfully", listing: result });
+      res.status(HttpError.SUCCESSFUL_CODE).json({
+        message: HttpError.HTTP_MESSAGE.SUCCESS_UPDATE_JOB_LISTING,
+        listing: result,
+      });
     }
   } catch (error) {
     next(error);

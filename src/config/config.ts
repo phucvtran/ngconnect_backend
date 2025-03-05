@@ -1,3 +1,4 @@
+//database configuration and cors config for the website.
 const config = {
   getDataBaseConfig: () => ({
     database: process.env.DB_NAME,

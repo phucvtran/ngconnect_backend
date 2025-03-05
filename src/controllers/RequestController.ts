@@ -9,6 +9,13 @@ import ReservationDates from "../models/ReservationDates";
 import { PaginationResponse } from "../utils/PaginationResponse";
 import User from "../models/User";
 
+/**
+ * Create listing Request,
+ * check if user logged in, check if listing is available, check if user try to create request for their own listing
+ * @param req request must have list of datetimes, and message
+ * @param res
+ * @param next
+ */
 export const createRequest = async (
   req: Request,
   res: Response,
@@ -20,9 +27,10 @@ export const createRequest = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
+      // user must login before creating the request
       requestBody.createdUser = res.locals.user.id;
 
       // check if the user already make request for this listing
@@ -38,7 +46,7 @@ export const createRequest = async (
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
           HttpError.BAD_REQUEST_DESCRIPTION,
-          "Request already exist for this listing"
+          HttpError.HTTP_MESSAGE.ERROR_REQUEST_EXIST
         );
       }
 
@@ -50,7 +58,7 @@ export const createRequest = async (
         throw new HttpError(
           HttpError.BAD_REQUEST_CODE,
           HttpError.BAD_REQUEST_DESCRIPTION,
-          "Listing doesn't exist"
+          HttpError.HTTP_MESSAGE.ERROR_LISTING_DOESNOT_EXISTED
         );
       } else {
         if (listing.user.id === res.locals.user.id) {
@@ -58,7 +66,7 @@ export const createRequest = async (
           throw new HttpError(
             HttpError.BAD_REQUEST_CODE,
             HttpError.BAD_REQUEST_DESCRIPTION,
-            "Can't create request for your own listing"
+            HttpError.HTTP_MESSAGE.ERROR_CREATE_REQUEST_FOR_OWN_LISTING
           );
         }
       }
@@ -99,7 +107,7 @@ export const createRequest = async (
         return listingRequest;
       });
       res.status(HttpError.CREATE_SUCCESSFUL_CODE).json({
-        message: "create listing request successfully",
+        message: HttpError.HTTP_MESSAGE.SUCCESS_CREATE_LISTING_REQUEST,
         listingRequest: result,
       });
     }
@@ -108,6 +116,12 @@ export const createRequest = async (
   }
 };
 
+/**
+ * Get listing request by ID
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getRequestById = async (
   req: Request,
   res: Response,
@@ -118,9 +132,10 @@ export const getRequestById = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
+      // listing request has conversation (chat) and reservationDates(schedule - date and time)
       const listingRequest = await ListingRequest.findOne({
         where: { id: req.params.id, createdUser: res.locals.user.id },
         include: ["conversations", "reservationDates"],
@@ -132,7 +147,7 @@ export const getRequestById = async (
           "Listing Request does not exist."
         );
       } else {
-        res.status(HttpError.SUCESSFUL_CODE).json(listingRequest);
+        res.status(HttpError.SUCCESSFUL_CODE).json(listingRequest);
       }
     }
   } catch (error) {
@@ -151,7 +166,7 @@ export const getRequestByListingId = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       const { rows: request, count: total } =
@@ -178,13 +193,19 @@ export const getRequestByListingId = async (
         });
       response.setResults(request);
       response.setTotal(total);
-      res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
+      res.status(HttpError.SUCCESSFUL_CODE).json(response.getResponse());
     }
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * get request by user id. get all the request for a user.
+ * @param req userID
+ * @param res a list of request for the userID
+ * @param next
+ */
 export const getRequestByUserId = async (
   req: Request,
   res: Response,
@@ -197,14 +218,14 @@ export const getRequestByUserId = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id != req.params.userId) {
       // make sure that user only get the requests belong to them
       throw new HttpError(
         HttpError.FORBIDDEN_CODE,
         HttpError.FORBIDDEN_DESCRIPTION,
-        "Restricted permission"
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       const { rows: request, count: total } =
@@ -232,13 +253,19 @@ export const getRequestByUserId = async (
         });
       response.setResults(request);
       response.setTotal(total);
-      res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
+      res.status(HttpError.SUCCESSFUL_CODE).json(response.getResponse());
     }
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * Get conversation by request ID
+ * @param req request ID
+ * @param res return a conversation (chat) for the requestID.
+ * @param next
+ */
 export const getConversationByRequestId = async (
   req: Request,
   res: Response,
@@ -251,7 +278,7 @@ export const getConversationByRequestId = async (
       throw new HttpError(
         HttpError.UNAUTHORIZED_CODE,
         HttpError.UNAUTHORIZED_DESCRIPTION,
-        "Restricted permission or session is expired."
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
       );
     } else if (res.locals.user.id) {
       const { rows: conversations, count: total } =
@@ -263,7 +290,7 @@ export const getConversationByRequestId = async (
         });
       response.setResults(conversations);
       response.setTotal(total);
-      res.status(HttpError.SUCESSFUL_CODE).json(response.getResponse());
+      res.status(HttpError.SUCCESSFUL_CODE).json(response.getResponse());
     }
   } catch (error) {
     next(error);

@@ -6,7 +6,7 @@ const sequelize = new Sequelize({
   ...config.getDataBaseConfig(),
   dialect: "mysql",
   // dialectModule: require('mysql2'),
-  models: [path.join(__dirname, "../models")],
+  models: [path.join(__dirname, "../models")], // every file in models folder represent a database table.
 });
 
 export default sequelize;

@@ -4,6 +4,13 @@ import { HttpError } from "../utils/httpError";
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY + "";
 
+/**
+ * JWT user Token
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
 const extractJWT = (req: Request, res: Response, next: NextFunction) => {
   let token = req.headers.authorization?.split(" ")[1];
 
