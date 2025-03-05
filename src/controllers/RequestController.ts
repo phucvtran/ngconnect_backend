@@ -189,6 +189,7 @@ export const getRequestByListingId = async (
               model: Conversations,
               required: true,
             },
+            { model: Listing, include: [{ model: User }] },
           ],
         });
       response.setResults(request);
