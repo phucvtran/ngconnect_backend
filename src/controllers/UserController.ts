@@ -9,8 +9,14 @@ import { HttpError } from "../utils/httpError";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY + "";
 const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_TOKEN_SECRET + "";
-const TOKEN_EXPIRATION_TIME = "2h";
+const TOKEN_EXPIRATION_TIME = "2h"; // the access token default expiration time is 2 hour
 
+/**
+ * Create user,
+ * @param req
+ * @param res
+ * @param next
+ */
 export const createUser = async (
   req: Request,
   res: Response,
@@ -24,12 +30,20 @@ export const createUser = async (
   requestBody.password = hash;
   try {
     await User.create(requestBody);
-    res.status(201).json({ message: "User registered successfully" });
+    res
+      .status(201)
+      .json({ message: HttpError.HTTP_MESSAGE.SUCCESS_CREATE_USER });
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * user login, generate acess token (2 hours) and refresh token (7 days).
+ * @param req username and password
+ * @param res
+ * @param next
+ */
 export const login = async (
   req: Request,
   res: Response,
@@ -44,7 +58,7 @@ export const login = async (
       throw new HttpError(
         HttpError.NOT_FOUND_CODE,
         HttpError.NOT_FOUND_DESCRIPTION,
-        "user not found"
+        HttpError.HTTP_MESSAGE.ERROR_USER_NOT_FOUND
       );
     } else {
       const isValidUser = await bcrypt.compare(password, user.password);
@@ -53,20 +67,21 @@ export const login = async (
         throw new HttpError(
           HttpError.UNAUTHORIZED_CODE,
           HttpError.UNAUTHORIZED_DESCRIPTION,
-          "password is incorrect."
+          HttpError.HTTP_MESSAGE.ERROR_INVALID_PASSWORD
         );
       }
 
+      // generate access token and refresh token for the user.
       signJWT(user, (err, token, refreshToken) => {
         if (err) {
           throw new HttpError(
             HttpError.UNAUTHORIZED_CODE,
             HttpError.UNAUTHORIZED_DESCRIPTION,
-            "Unable to sign JWT"
+            HttpError.HTTP_MESSAGE.ERROR_JWT_SIGN_TOKEN
           );
         } else if (token) {
           return res.status(200).json({
-            message: "Login Successful",
+            message: HttpError.HTTP_MESSAGE.SUCCESS_LOGIN,
             token: { accessToken: token, refreshToken: refreshToken },
             user: user,
           });
@@ -78,6 +93,13 @@ export const login = async (
   }
 };
 
+/**
+ * Refresh access token, if the access token is expire and refresh token is valid. generate new access token for user.
+ * @param req refresh token
+ * @param res new access token
+ * @param next
+ * @returns
+ */
 export const refreshAccessToken = async (
   req: Request,
   res: Response,
@@ -85,12 +107,12 @@ export const refreshAccessToken = async (
 ) => {
   try {
     const { refreshToken } = req.body;
-
+    //check if refresh token is valid
     if (!refreshToken) {
       throw new HttpError(
         HttpError.BAD_REQUEST_CODE,
         HttpError.BAD_REQUEST_DESCRIPTION,
-        "Refresh token is required"
+        HttpError.HTTP_MESSAGE.ERROR_MISSING_REFRESH_TOKEN
       );
     }
 
@@ -108,7 +130,7 @@ export const refreshAccessToken = async (
       throw new HttpError(
         HttpError.FORBIDDEN_CODE,
         HttpError.FORBIDDEN_DESCRIPTION,
-        "Invalid or expired refresh token."
+        HttpError.HTTP_MESSAGE.ERROR_INVALID_REFRESH_TOKEN
       );
     }
 
@@ -124,7 +146,7 @@ export const refreshAccessToken = async (
     );
 
     return res.status(200).json({
-      message: "Access token refreshed successfully.",
+      message: HttpError.HTTP_MESSAGE.SUCCESS_REFRESH_ACCESS_TOKEN,
       accessToken,
     });
   } catch (error: any) {
@@ -132,6 +154,13 @@ export const refreshAccessToken = async (
   }
 };
 
+/**
+ * Logout, clear refresh token
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
 export const logout = async (
   req: Request,
   res: Response,
@@ -144,7 +173,7 @@ export const logout = async (
       throw new HttpError(
         HttpError.BAD_REQUEST_CODE,
         HttpError.BAD_REQUEST_DESCRIPTION,
-        "Refresh token is required for logout."
+        HttpError.HTTP_MESSAGE.ERROR_LOGOUT_REFRESH_TOKEN_MISSING
       );
     }
 
@@ -157,7 +186,7 @@ export const logout = async (
       throw new HttpError(
         HttpError.NOT_FOUND_CODE,
         HttpError.NOT_FOUND_DESCRIPTION,
-        "Token not found or already invalidated."
+        HttpError.HTTP_MESSAGE.ERROR_INVALID_TOKEN
       );
     }
 
@@ -166,11 +195,13 @@ export const logout = async (
 
     return res
       .status(200)
-      .json({ message: "Logged out successfully. Token invalidated." });
+      .json({ message: HttpError.HTTP_MESSAGE.SUCCESS_LOGOUT });
   } catch (error) {
     next(error);
   }
 };
+
+// Note: these API is for user management, the app doesn't have admin portal a this point.
 
 // export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
 //   try {

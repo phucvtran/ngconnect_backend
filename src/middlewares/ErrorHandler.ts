@@ -1,7 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { ValidationError } from "sequelize";
 import { HttpError } from "../utils/httpError";
-
+/**
+ * error handler, http interceptor. handle general error
+ * @param err
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
 export const ErrorHandler = (
   err: any,
   req: Request,
@@ -11,13 +18,11 @@ export const ErrorHandler = (
   // console.error(err); // Log error for debugging
 
   if (err instanceof HttpError) {
-    return res
-      .status(err.statusCode)
-      .json({
-        error_code: err.statusCode,
-        description: err.description,
-        message: err.message,
-      });
+    return res.status(err.statusCode).json({
+      error_code: err.statusCode,
+      description: err.description,
+      message: err.message,
+    });
   }
 
   // Handle Sequelize validation errors

@@ -24,6 +24,13 @@ const createRequestSchema = Joi.object({
     }),
 });
 
+/**
+ * listing request api schema validation.
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
 export const validateListingRequest = (
   req: Request,
   res: Response,
