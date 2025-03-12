@@ -7,14 +7,23 @@ import {
   getAllListings,
   getListingById,
   getListingsByCurrentUser,
+  uploadListingImage,
 } from "../controllers/ListingController";
 import extractJWT from "../middlewares/extractJWT";
+import upload from "../middlewares/multer";
 
 const router = express.Router();
 
 router.post("/", extractJWT, createListing); // create listing
 
 router.put("/:id", extractJWT, editListing); // update listing
+
+router.post(
+  "/:listingId/uploadImage",
+  upload.array("listingImages", 5),
+  extractJWT,
+  uploadListingImage
+); // upload image for a listing
 
 router.post("/job", extractJWT, createJob); // create job
 

@@ -15,6 +15,7 @@ import {
 import User from "./User";
 import Job from "./Job";
 import ListingRequest from "./ListingRequest";
+import { ListingImage } from "./ListingImage";
 
 interface ListingAttributes {
   id: number;
@@ -177,6 +178,9 @@ export default class Listing extends Model<
     field: "updated_date",
   })
   declare updatedDate: Date;
+
+  @HasMany(() => ListingImage)
+  listingImages!: ListingImage[];
 
   @HasOne(() => Job)
   declare job: Job;

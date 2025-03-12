@@ -6,6 +6,8 @@ import { PaginationResponse } from "../utils/PaginationResponse";
 import Job from "../models/Job";
 import sequelize from "../config/dbConnection";
 import { Op } from "sequelize";
+import { BUCKET_NAME, s3 } from "../config/aws";
+import { ListingImage } from "../models/ListingImage";
 
 /**
  * create listing item
@@ -33,11 +35,92 @@ export const createListing = async (
           HttpError.HTTP_MESSAGE.ERROR_CREATE_JOB
         );
       }
-      await Listing.create(requestBody);
+      const listing = await Listing.create(requestBody);
       res.status(HttpError.CREATE_SUCCESSFUL_CODE).json({
         message: HttpError.HTTP_MESSAGE.SUCCESS_CREATE_LISTING,
-        listing: requestBody,
+        listing: listing,
       });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadListingImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    //check if user is loged in
+    if (!res.locals || !res.locals.user.id) {
+      throw new HttpError(
+        HttpError.UNAUTHORIZED_CODE,
+        HttpError.UNAUTHORIZED_DESCRIPTION,
+        HttpError.HTTP_MESSAGE.ERROR_RESTRICTED_PERMISSION
+      );
+    } else if (res.locals.user.id) {
+      const listingId = parseInt(req.params.listingId);
+
+      // check if listingID is valid
+      if (!listingId) {
+        throw new HttpError(
+          HttpError.NOT_FOUND_CODE,
+          HttpError.NOT_FOUND_DESCRIPTION,
+          HttpError.HTTP_MESSAGE.ERROR_LISTING_DOESNOT_EXISTED
+        );
+      }
+
+      const files = req.files as Express.Multer.File[];
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+      for (const file of files) {
+        if (!allowedTypes.includes(file.mimetype)) {
+          throw new HttpError(
+            HttpError.BAD_REQUEST_CODE,
+            HttpError.BAD_REQUEST_DESCRIPTION,
+            HttpError.HTTP_MESSAGE.ERROR_IMAGE_FORMAT
+          );
+        }
+      }
+
+      // check if files is empty
+      if (!files || files.length === 0) {
+        throw new HttpError(
+          HttpError.BAD_REQUEST_CODE,
+          HttpError.BAD_REQUEST_DESCRIPTION,
+          HttpError.HTTP_MESSAGE.ERROR_NO_IMAGE_UPLOAD
+        );
+      }
+
+      // get listing by listing id
+      const listing = await Listing.findByPk(listingId);
+
+      // check if listing is existed
+      if (!listing) {
+        throw new HttpError(
+          HttpError.NOT_FOUND_CODE,
+          HttpError.NOT_FOUND_DESCRIPTION,
+          HttpError.HTTP_MESSAGE.ERROR_LISTING_DOESNOT_EXISTED
+        );
+      }
+
+      const imagePromises = files.map(async (file) => {
+        const fileName = `listings/${listingId}/${Date.now()}-${
+          file.originalname
+        }`;
+        const params = {
+          Bucket: BUCKET_NAME,
+          Key: fileName,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        };
+        const data = await s3.upload(params).promise();
+        return ListingImage.create({ url: data.Location, fileName, listingId });
+      });
+      const images = await Promise.all(imagePromises);
+      res
+        .status(HttpError.SUCCESSFUL_CODE)
+        .json({ message: HttpError.HTTP_MESSAGE.SUCCESS_IMAGE_UPLOAD, images });
     }
   } catch (error) {
     next(error);
@@ -150,7 +233,7 @@ export const getAllListings = async (
       offset: response.getOffset(),
       order: response.getOrder(),
       distinct: true,
-      include: ["user", "job"], // include user and job object in the response.
+      include: ["user", "job", "listingImages"], // include user and job object in the response.
       // attributes: { exclude: ["password"] },
     });
 
@@ -189,7 +272,7 @@ export const getListingsByCurrentUser = async (
         offset: response.getOffset(),
         order: response.getOrder(),
         distinct: true,
-        include: ["user", "job"],
+        include: ["user", "job", "listingImages"],
       });
       response.setResults(listings);
       response.setTotal(total);
@@ -214,7 +297,7 @@ export const getListingById = async (
   try {
     const listing = await Listing.findOne({
       where: { id: req.params.id },
-      include: ["user", "job"],
+      include: ["user", "job", "listingImages"],
     });
     if (!listing) {
       throw new HttpError(

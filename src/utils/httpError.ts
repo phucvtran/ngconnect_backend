@@ -39,6 +39,9 @@ export class HttpError extends Error {
     ERROR_INVALID_REFRESH_TOKEN: "Invalid or expired refresh token.",
     SUCCESS_REFRESH_ACCESS_TOKEN: "Access token refreshed successfully.",
     SUCCESS_LOGOUT: "Logged out successfully. Token invalidated.",
+    ERROR_IMAGE_FORMAT: "Only images (jpeg, jpg, png) are allowed",
+    ERROR_NO_IMAGE_UPLOAD: "No image files uploaded",
+    SUCCESS_IMAGE_UPLOAD: "Images uploaded.",
   };
 
   public static CREATE_SUCCESSFUL_CODE = 201;
